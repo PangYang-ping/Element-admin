@@ -36,7 +36,7 @@
           <el-table-column label="操作" width="200">
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="$router.push('/employees/detail?id=' + scope.row.id)">查看</el-button>
-              <el-button type="text" size="small">分配角色</el-button>
+              <el-button type="text" size="small" @click="setEmp(scope.row.id)">分配角色</el-button>
               <el-button type="text" size="small" @click="delEmp(scope.row.id)">删除</el-button>
             </template>
           </el-table-column>
@@ -56,11 +56,21 @@
       <!-- 新增员工弹框组件 -->
       <el-dialog
         title="新增员工"
-        :visible.sync="showDialog"
+        :visible="showDialog"
         :close-on-click-modal="false"
         :close-on-press-escape="false"
       >
         <emp-dialog @close="closeHandler" />
+      </el-dialog>
+
+      <!-- 分配权限弹窗 -->
+      <el-dialog
+        title="分配角色"
+        :visible.sync="showRoleDialog"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+      >
+        <assign-role v-if="showRoleDialog" :user-id="userId" @close="showRoleDialog = false" />
       </el-dialog>
     </div>
 
@@ -74,13 +84,17 @@ import { getEmployeeList, delEmployee } from '@/api/employees'
 // 导入枚举插件
 import EmployeeEnum from '@/constant/employees'
 
-// 导入弹窗组件
+// 导入新增员工弹窗组件
 import empDialog from './empDialog.vue'
+
+// 导入分配角色弹窗组件
+import AssignRole from './assignRole.vue'
 
 export default {
   // 注册弹窗组件
   components: {
-    empDialog
+    empDialog,
+    AssignRole
   },
   data() {
     return {
@@ -90,7 +104,9 @@ export default {
       },
       total: 0, // 数据总条数
       employeesList: [], // 员工列表
-      showDialog: false // 控制弹窗的显示与隐藏
+      showDialog: false, // 控制新增员工弹窗的显示与隐藏
+      showRoleDialog: false, // 控制分配角色弹窗组件
+      userId: ''
     }
   },
   created() {
@@ -98,6 +114,11 @@ export default {
     this.getEmployeeList()
   },
   methods: {
+    // 点击分配角色
+    setEmp(id) {
+      this.showRoleDialog = true
+      this.userId = id
+    },
     // 格式化Excel
     transData(rows) {
       const map = {
@@ -121,6 +142,7 @@ export default {
       })
       return { header, data }
     },
+
     // 导出Excel
     async downloadExcel() {
       const res = await getEmployeeList()

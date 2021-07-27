@@ -1,4 +1,4 @@
-import router from './router'
+import router, { asyncRoutes } from './router'
 import store from './store'
 // 引入标题组件
 import getPageTitle from '@/utils/get-page-title'
@@ -18,7 +18,29 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // 如果不是留在原地
       // 调用API接口,进行数据展示
-      await store.dispatch('user/getUserInfo')
+      if (!store.getters.userId) {
+        const menus = await store.dispatch('user/getUserInfo')
+        // 根据用户实际的权限 menus 从 asyncRoutes 中过滤出用户能访问的页面
+        const filterRoutes = asyncRoutes.filter(route => {
+          const routeName = route.children[0].name
+          return menus.includes(routeName)
+        })
+        router.addRouters(filterRoutes)
+
+        // 404 page must be placed at the end !!!
+        filterRoutes.push(
+          { path: '*', redirect: '/404', hidden: true }
+        )
+
+        // 将动态路由传递给 mutation 方法，进行合并
+        store.commit('permission/setRoutes', asyncRoutes)
+        // 解决刷新出现的白屏bug
+        next({
+          path: to.path, // 保证路由添加完了再进入页面 (可以理解为重进一次)
+          replace: true // 重进一次, 不保留重复历史
+        })
+      }
+
       next()
     }
   } else {

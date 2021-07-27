@@ -39,3 +39,21 @@ export function importEmployee(data) {
     data
   })
 }
+
+// 保存员工基本信息
+export function saveUserDetailById(id, data) {
+  return request({
+    url: `/sys/user/${id}`,
+    method: 'PUT',
+    data
+  })
+}
+
+// 保存员工分配角色
+export function assignRoles(data) {
+  return request({
+    url: '/sys/user/assignRoles',
+    method: 'put',
+    data
+  })
+}

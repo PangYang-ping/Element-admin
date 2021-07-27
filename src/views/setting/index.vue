@@ -22,7 +22,7 @@
               <el-table-column prop="description" label="描述" />
               <el-table-column label="操作">
                 <template slot-scope="scope">
-                  <el-button size="small" type="success" @click="setRoles(scope.row)">分配权限</el-button>
+                  <el-button size="small" type="success" @click="setRoles(scope.row.id)">分配权限</el-button>
                   <el-button size="small" type="primary" @click="editRoles(scope.row)">编辑</el-button>
                   <el-button size="small" type="danger" @click="delRoles(scope.row)">删除</el-button>
                 </template>
@@ -40,6 +40,8 @@
               @current-change="handleCurrentChange"
             />
           </el-tab-pane>
+
+          <!-- 公司信息 -->
           <el-tab-pane label="公司信息" class="tab-pane">
             <el-alert
               title="对公司名称、公司地址、营业执照、公司地区的更新，将使得公司资料被重新审核，请谨慎修改"
@@ -84,6 +86,16 @@
             <el-button size="small" type="primary" @click="roleSubmit">确定</el-button>
           </span>
         </el-dialog>
+
+        <!-- 分配权限弹框 -->
+        <el-dialog
+          title="分配权限"
+          :visible.sync="setRoldDialog"
+          width="50%"
+        >
+          <assign-permission v-if="setRoldDialog" :role-id="roleId" @close="setRoldDialog = false" />
+        </el-dialog>
+
       </el-card>
     </div>
   </div>
@@ -92,7 +104,12 @@
 <script>
 // 导入对应api接口
 import { getRoles, getCompanyInfo, addRole, getRoleId, updateRole, deleteRole } from '@/api/setting'
+// 导入分配权限页面组件
+import assignPermission from './assignPermission.vue'
 export default {
+  components: {
+    assignPermission
+  },
   data() {
     return {
       activeName: 'first',
@@ -118,7 +135,9 @@ export default {
         description: [
           { required: true, message: '请输入角色描述', trigger: 'blur' }
         ]
-      }
+      },
+      setRoldDialog: false, // 控制权限弹窗的显示与隐藏
+      roleId: ''
     }
   },
   created() {
@@ -129,6 +148,12 @@ export default {
     this.getCompanyInfo()
   },
   methods: {
+    // 点击分配权限按钮
+    setRoles(id) {
+      this.setRoldDialog = true
+      this.roleId = id
+    },
+
     // 点击添加/编辑表中的取消按钮
     cancleRoles() {
       // 隐藏弹框
@@ -175,6 +200,7 @@ export default {
       // 打开弹窗
       this.dialogVisible = true
     },
+
     // 获取公司详细信息
     async getCompanyInfo() {
       const res = await getCompanyInfo(this.$store.getters.companyId)
@@ -198,9 +224,6 @@ export default {
       this.query.page = newPage
       this.getRolesList()
     },
-
-    // 设置角色
-    setRoles() {},
 
     // 编辑角色
     async editRoles(row) {

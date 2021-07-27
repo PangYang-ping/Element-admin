@@ -1,5 +1,6 @@
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { login, getUserProfile, getUserDetailById } from '@/api/user'
+import { resetRouter } from '@/router'
 export default {
   namespaced: true,
   state: {
@@ -40,6 +41,7 @@ export default {
       const res = await getUserProfile()
       const detailInfo = await getUserDetailById(res.data.userId)
       context.commit('setUserInfo', { ...detailInfo.data, ...res.data })
+      return res.data.roles.menus
     },
 
     // 点击退出时的处理
@@ -48,6 +50,8 @@ export default {
       context.commit('removeToken')
       // 点击清除用户信息
       context.commit('removeuserInfo')
+      // 重置路由
+      resetRouter()
     }
   }
 }
