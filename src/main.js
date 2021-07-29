@@ -6,6 +6,10 @@ import 'normalize.css/normalize.css' // A modern alternative to CSS resets
 import Components from './components'
 Vue.use(Components)
 
+// 导入全局挂载的组件
+import Directive from './directive'
+Vue.use(Directive)
+
 // 引入element-ui
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'

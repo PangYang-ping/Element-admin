@@ -25,7 +25,7 @@ router.beforeEach(async(to, from, next) => {
           const routeName = route.children[0].name
           return menus.includes(routeName)
         })
-        router.addRouters(filterRoutes)
+        router.addRoutes(filterRoutes)
 
         // 404 page must be placed at the end !!!
         filterRoutes.push(
